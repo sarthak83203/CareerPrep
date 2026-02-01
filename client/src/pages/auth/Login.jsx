@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
+import { validateEmail } from "../../utils/helper";
 
 export default function Login({setCurrentPage}){ //props
     const [email,setEmail]=useState("");
@@ -10,8 +11,32 @@ export default function Login({setCurrentPage}){ //props
     
     const handleLogin=async (e)=>{
         e.preventDefault();
+         if(!validateEmail(email)){
+        setError ("Please enter proper email address..")
+        return;
+    }
+    if(!password){
+        setError("Enter a valid password..");
+        return;  
+    }
+
+    setError("");
+
+//Calling login API
+try{
+}
+catch(err){
+    if(err.response && err.response.data.message){
+        setError(err.response.data.message);
+    }else{
+        setError("Something went wrong");
+    }
+
+}
 
     }
+   
+
     return(
         <div className="w-[90vw] md:w-[33vw] p-7  flex flex-col justify-center">
             <h3 className="text-lg font-semibold text-black">Welcome Back</h3>
