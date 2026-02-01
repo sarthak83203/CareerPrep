@@ -7,6 +7,8 @@ export default function Modal({
 }) {
 
   if (!isOpen) return null; // hide modal
+
+   if(!isOpen) return null;
         return(
         <div className="fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/40">
             <div className={`relative flex flex-col bg-white shadow-lg rounded-lg overflow-hidden`}>
