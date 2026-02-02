@@ -33,4 +33,9 @@ app.listen(PORT,()=>{
     console.log(`Server is Listening to ${PORT}`);
 })
 
+app.get("/",(req,res)=>{
+    res.send("Yes Succesfully running");
+    
+})
+
 
