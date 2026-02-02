@@ -3,8 +3,10 @@ const express=require("express");
 const cors=require("cors");
 const path=require("path");
 const connectDb = require("./config/db");
+const authRoutes = require("./routes/authRoutes.js");
 
 const app=express();
+
 
 //Middle ware that haddles cores
 
@@ -22,7 +24,7 @@ app.use(express.json()); //parsing the message..
  
 
 //Routes
-
+app.use("/api/auth",authRoutes);
 
 //Serve uploads folder
 app.use("/uploads",express.static(path.join(__dirname,"uploads"),{}));
@@ -36,9 +38,15 @@ app.listen(PORT,()=>{
 //Dtabase call
 connectDb();
 
-app.get("/",(req,res)=>{
-    res.send("Yes Succesfully running");
-    
-})
+//Routes
+
+// app.use("/api/sessions",sessionRoutes);
+// app.use("/api/questionRoutes",questionRoutes);
+
+//ai geneartor
+// app.use("/api/ai/generate-questions",protect,generateInterviewQuestions);
+// app.use("/api/ai/generate-explanation",protect,generateConceptExplanation);
+
+
 
 
