@@ -2,6 +2,7 @@ require("dotenv").config();
 const express=require("express");
 const cors=require("cors");
 const path=require("path");
+const connectDb = require("./config/db");
 
 const app=express();
 
@@ -32,6 +33,8 @@ const PORT=process.env.PORT || 5000;
 app.listen(PORT,()=>{
     console.log(`Server is Listening to ${PORT}`);
 })
+//Dtabase call
+connectDb();
 
 app.get("/",(req,res)=>{
     res.send("Yes Succesfully running");
