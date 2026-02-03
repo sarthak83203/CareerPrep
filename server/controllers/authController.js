@@ -31,7 +31,7 @@ const registerUser=async(req,res)=>{
         })
 
         //Return user data with JWT
-        res.status(201).json({
+        res.status(201).json({  //will taken by frontend
             _id:user._id,
             name:user.name,
             email:user.email,
@@ -50,6 +50,41 @@ const registerUser=async(req,res)=>{
 
 //LOgin of new user..
 const loginUser=async (req,res)=>{
+    try{
+        const {email,password}=req.body;
+        const user=await User.findOne({email});    //It will give all the data like name etc and etc
+        //user
+        if(!user){
+            return res.status(500).json({message:"Invalid email or password"});
+        }
+
+        //comparing password
+        const isMatch=await bcrypt.compare(password,user.password);
+        if(!isMatch){
+            res.status(500).json({
+                message:"Please enter a correct password",
+            })
+        }
+
+        //Now return userdata with JWT
+        res.json({
+            _id:user._id,
+            name:user.name,
+            email:user.email,
+            profileImageUrl:user.profileImageUrl,
+            token:generateToken(user._id),
+        })
+
+
+
+
+    }catch(err){
+        res.status(500).json({
+            message:"Server Error",
+        })
+
+    }
+
     
 
 
@@ -57,7 +92,22 @@ const loginUser=async (req,res)=>{
 }
 //getprofile
 
-const getUserProfile=async ()=>{
+const getUserProfile=async (req,res)=>{
+    try{
+
+    const user = await User.findById(req.user.id).select("-password");
+    if(!user){
+        res.status(404).json({
+            message:"User not found",
+        })
+    }
+    res.json(user);
+    } catch(err){
+    res.status(500).json({
+        message:"Error",
+
+    })
+}
 
 
 }
