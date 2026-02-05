@@ -4,6 +4,10 @@ const cors=require("cors");
 const path=require("path");
 const connectDb = require("./config/db");
 const authRoutes = require("./routes/authRoutes.js");
+const sessionRoutes = require("./routes/sessionRoutes");
+
+
+
 
 const app=express();
 
@@ -40,7 +44,7 @@ connectDb();
 
 //Routes
 
-// app.use("/api/sessions",sessionRoutes);
+app.use("/api/sessions",sessionRoutes);
 // app.use("/api/questionRoutes",questionRoutes);
 
 //ai geneartor

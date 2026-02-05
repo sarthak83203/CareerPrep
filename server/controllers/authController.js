@@ -15,7 +15,7 @@ const registerUser=async(req,res)=>{
         const {name,email,password,profileImageUrl}=req.body;
         const userExist=await User.findOne({email});
         if(userExist){
-            res.status(400).json({
+           return res.status(400).json({
                 message:"User already exist"
             })
         }
@@ -55,13 +55,13 @@ const loginUser=async (req,res)=>{
         const user=await User.findOne({email});    //It will give all the data like name etc and etc
         //user
         if(!user){
-            return res.status(500).json({message:"Invalid email or password"});
+            return res.status(401).json({message:"Invalid email or password"});
         }
 
         //comparing password
         const isMatch=await bcrypt.compare(password,user.password);
         if(!isMatch){
-            res.status(500).json({
+           return res.status(500).json({
                 message:"Please enter a correct password",
             })
         }
@@ -95,9 +95,9 @@ const loginUser=async (req,res)=>{
 const getUserProfile=async (req,res)=>{
     try{
 
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     if(!user){
-        res.status(404).json({
+        return res.status(404).json({
             message:"User not found",
         })
     }

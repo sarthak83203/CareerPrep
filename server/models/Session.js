@@ -20,7 +20,7 @@ const  sessionSchema=new mongoose.Schema({
         type:String,
         required:true,
     },
-    qustions:[{type:mongoose.Schema.Types.ObjectId,ref:"Question"}],
+    questions:[{type:mongoose.Schema.Types.ObjectId,ref:"Question"}],
 
 
 },{timestamps:true});
