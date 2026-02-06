@@ -45,7 +45,7 @@ connectDb();
 //Routes
 
 app.use("/api/sessions",sessionRoutes);
-// app.use("/api/questionRoutes",questionRoutes);
+app.use("/api/questionRoutes",questionRoutes);
 
 //ai geneartor
 // app.use("/api/ai/generate-questions",protect,generateInterviewQuestions);

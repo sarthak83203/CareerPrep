@@ -62,11 +62,64 @@ const getMySessions=async (req,res)=>{
 
 //get the session by id with populated questions..
 const getSessionById =async(req,res)=>{
+    try{
+        const session=await Session.findById(req.params.id)
+        .populate({
+            path:"questions",
+            options:{sort:{isPinned:-1, createdAt:1}},
+
+        })
+        .exec();  //when hit execute it runs....
+
+        if(!session){
+            return res.status(404).json({success:false,message:"Session Not found"});
+        }
+        res.status(200).json({success:true,session});
+
+
+    }
+    catch(err){
+        res.status(500).json({
+            success:false,
+            message:"Sever Error",
+        })
+    }
 
 }
 
 //delete a session and its questions....
 const deleteSession=async(req,res)=>{
+    try{
+        const session=await Session.findById(req.params.id);   //coming from express routes....
+    if(!session){
+        return res.status(404).json({
+            message:"Message not found",
+        });
+    }
+
+    //check if login user owns this message or not
+    if(session.user.toString()!==req.user._id.toString()){
+        return res.status(401).json({  
+        })
+
+    }
+    //First Delete all the question Linked to this session..
+    await Question.deleteMany({session:session._id});
+
+    //delete the session
+    await session.deleteOne();
+    res.status(200).json({
+        message:"Session Deleted",
+    })
+        
+    }catch(err){
+        res.status(500).json({
+            success:false,
+            message:"Server Error",
+        })
+    }
+    
+
 
 
 }
