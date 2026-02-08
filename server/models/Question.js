@@ -12,7 +12,7 @@ const questionSchema=new mongoose.Schema({
         type:String,
 
     },
-    notes:{
+    note:{
         type:String,
     },
     isPinned:{
