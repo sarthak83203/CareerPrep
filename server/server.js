@@ -6,6 +6,8 @@ const connectDb = require("./config/db");
 const authRoutes = require("./routes/authRoutes.js");
 const sessionRoutes = require("./routes/sessionRoutes");
 const questionRoutes = require("./routes/questionRoutes.js");
+const { protect } = require("./middlewares/authMiddleware.js");
+const { generateInterviewQuestions, generateConceptExplanation } = require("./controllers/aiController.js");
 
 
 const app=express();
@@ -47,8 +49,8 @@ app.use("/api/sessions",sessionRoutes);
 app.use("/api/questions",questionRoutes);
 
 //ai geneartor
-// app.use("/api/ai/generate-questions",protect,generateInterviewQuestions);
-// app.use("/api/ai/generate-explanation",protect,generateConceptExplanation);
+app.use("/api/ai/generate-questions",protect,generateInterviewQuestions);
+app.use("/api/ai/generate-explanation",protect,generateConceptExplanation);
 
 
 
