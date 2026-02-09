@@ -61,7 +61,7 @@ const loginUser=async (req,res)=>{
         //comparing password
         const isMatch=await bcrypt.compare(password,user.password);
         if(!isMatch){
-           return res.status(500).json({
+           return res.status(401).json({
                 message:"Please enter a correct password",
             })
         }
