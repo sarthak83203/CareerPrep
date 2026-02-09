@@ -7,15 +7,25 @@ import Modal from "../components/Modal";
 
 import Login from "./auth/Login.jsx";
 import SignUp from "./auth/SignUp.jsx";
+import { useContext } from "react";
+import { UserContext } from "../context/userContext.jsx";
+import ProfileInfoCard from "../components/Cards/ProfileInfoCard.jsx";
 
 export default function LandingPage() {
+  const {user}=useContext(UserContext);
   const navigate = useNavigate();
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const [currentPage, setCurrentPage] = useState("login");
 
   const handleCTA = () => {
     // Example: navigate to a signup page or start
-    setOpenAuthModal(true);
+    if(!user){
+      setOpenAuthModal(true);
+
+    }else{
+      navigate("/dashboard");
+    }
+    
   };
 
   return (
@@ -34,13 +44,13 @@ export default function LandingPage() {
               CareerPrep
             </div>
 
-            <button
+          { user ?(<ProfileInfoCard/>):( <button
               className="group px-6 py-2 text-sm text-white rounded-lg bg-white/10 hover:bg-indigo-500/20 hover:text-indigo-300 transition active:scale-95 relative"
               onClick={() => setOpenAuthModal(true)}
             >
               <span className="absolute inset-0 rounded-xl ring-1 ring-white/20 group-hover:ring-white/40 transition" />
               Login / Sign Up
-            </button>
+            </button>)}
           </header>
 
           {/* Hero content */}

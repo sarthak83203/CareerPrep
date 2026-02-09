@@ -1,92 +1,113 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
 import { validateEmail } from "../../utils/helper";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
+import { UserContext } from "../../context/userContext";
 
-export default function Login({setCurrentPage}){ //props
-    const [email,setEmail]=useState("");
-    const [password,setPassword]=useState("");
-    const [error,setError]=useState(null);
-    const navigate=useNavigate();
-    
-    const handleLogin=async (e)=>{
-        e.preventDefault();
-         if(!validateEmail(email)){
-        setError ("Please enter proper email address..")
-        return;
+export default function Login({ setCurrentPage }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const {updateUser}=useContext(UserContext);
+
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email address");
+      return;
     }
-    if(!password){
-        setError("Enter a valid password..");
-        return;  
+
+    if (!password) {
+      setError("Password is required");
+      return;
     }
 
     setError("");
+    setLoading(true);
 
-//Calling login API
-try{
-}
-catch(err){
-    if(err.response && err.response.data.message){
-        setError(err.response.data.message);
-    }else{
-        setError("Something went wrong");
+    try {
+      const response = await axiosInstance.post(
+        API_PATHS.AUTH.LOGIN,
+        { email, password }
+      );
+      console.log("LOGIN RESPONSE:", response.data);
+
+
+      const token = response.data.token;
+
+      if (token) {
+        localStorage.setItem("token", token);
+        updateUser(response.data);
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Invalid email or password"
+      );
+    } finally {
+      setLoading(false);
     }
+  };
 
-}
+  return (
+    <div className="w-[90vw] md:w-[380px] p-8 bg-white rounded-2xl shadow-xl">
+      <h3 className="text-2xl font-bold text-gray-900">
+        Welcome Back 
+      </h3>
+      <p className="text-sm text-gray-500 mt-1 mb-6">
+        Login to continue to your dashboard
+      </p>
 
-    }
-   
+      <form onSubmit={handleLogin} className="space-y-4">
+        <Input
+          label="Email Address"
+          type="email"
+          placeholder="john@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-    return(
-        <div className="w-[90vw] md:w-[33vw] p-7  flex flex-col justify-center">
-            <h3 className="text-lg font-semibold text-black">Welcome Back</h3>
-            <p className="text-xs text-slate-700 mt-[5px] mb-6">Please enter you detail to log in</p>
-            <form onSubmit={handleLogin}>
-                <Input
-                 value={email}
-                 onChange={({target})=>
-                    setEmail(target.value)
-                 }
-                 label="Email Address"
-                 placeholder="john@example.com"
-                 type="text"
-                 />
+        <Input
+          label="Password"
+          type="password"
+          placeholder="Minimum 8 characters"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-                 <Input
-                  value={password}
-                  onChange={({target})=>
-                  setPassword(target.value)
-                }
-                label="Password"
-                placeholder="Min 8 characters"
-                type="password"
-                />
-                {error && <p className="text-red-500 text-xs pb-2.5">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-500 bg-red-50 p-2 rounded-md">
+            {error}
+          </p>
+        )}
 
-                <button type="submit" className="">
-                    Login
-                </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-primary text-white py-2.5 rounded-lg font-medium
+                     hover:bg-primary/90 transition-all
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
 
-               <p className="text-[13px] text-slate-800 mt-3">
-                Don't have an account?{" "}
-                <button className="font-medium text-primary underline cursor-pointer" onClick={()=>setCurrentPage("signup")}>
-                    Sign up
-                </button>
-
-
-               </p>
-
-               
-
-
-
-
-
-
-
-            </form>
-
-        </div>
-
-    );
+      <p className="text-sm text-gray-600 text-center mt-5">
+        Don&apos;t have an account?{" "}
+        <button
+          type="button"
+          onClick={() => setCurrentPage("signup")}
+          className="text-primary font-medium hover:underline"
+        >
+          Sign up
+        </button>
+      </p>
+    </div>
+  );
 }

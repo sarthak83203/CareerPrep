@@ -5,8 +5,10 @@ import SignUp from "./pages/auth/SignUp";
 import LandingPage from "./pages/LandingPage";
 import Dashboard from "./pages/Home/Dashboard";
 import InterviewPrep from "./pages/InterviewPrep/InterviewPrep";
+import UserProvider from "./context/userContext";
 export default function app(){
   return(
+    <UserProvider>
     <div>
       <Router>
         <Routes>
@@ -23,6 +25,7 @@ export default function app(){
 
 
     </div>
+    </UserProvider>
 
   );
 }
