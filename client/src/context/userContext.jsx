@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect } from "react";
+import { createContext, useEffect, useState } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 
-export const UserContext = createContext();
+export const UserContext = createContext(null);
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -10,33 +10,28 @@ const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const accessToken = localStorage.getItem("token");
-      if (!accessToken) {
+      const token = localStorage.getItem("token");
+      if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setUser(response.data);
-      } catch (error) {
-        console.error("User not authenticated", error);
-        clearUser();
+        const res = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
+        setUser(res.data.user);
+      } catch {
+        setUser(null);
+        localStorage.removeItem("token");
       } finally {
         setLoading(false);
       }
     };
 
-    if (!user) fetchUser();
-  }, [user]);
+    fetchUser();
+  }, []);
 
-  const updateUser = (userData, token) => {
+  const updateUser = (userData) => {
     setUser(userData);
-    localStorage.setItem("token", token);
     setLoading(false);
   };
 

@@ -16,44 +16,53 @@ export default function Login({ setCurrentPage }) {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+  if (!validateEmail(email)) {
+    setError("Please enter a valid email address");
+    return;
+  }
+
+  if (!password) {
+    setError("Password is required");
+    return;
+  }
+
+  setError("");
+  setLoading(true);
+
+  try {
+    const response = await axiosInstance.post(
+      API_PATHS.AUTH.LOGIN,
+      { email, password }
+    );
+
+    console.log("LOGIN RESPONSE:", response.data);
+const { token, user } = response.data;
+
+localStorage.setItem("token", token);
+updateUser(user);
+navigate("/dashboard");
+
+
+
+    if (!token) {
+      setError("Login failed. No token received.");
       return;
     }
 
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
+    localStorage.setItem("token", token);
+    updateUser(userData);
+    navigate("/dashboard");
 
-    setError("");
-    setLoading(true);
-
-    try {
-      const response = await axiosInstance.post(
-        API_PATHS.AUTH.LOGIN,
-        { email, password }
-      );
-      console.log("LOGIN RESPONSE:", response.data);
-
-
-      const token = response.data.token;
-
-      if (token) {
-        localStorage.setItem("token", token);
-        updateUser(response.data);
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Invalid email or password"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(
+      err.response?.data?.message || "Invalid email or password"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="w-[90vw] md:w-[380px] p-8 bg-white rounded-2xl shadow-xl">
