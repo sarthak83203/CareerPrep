@@ -7,11 +7,15 @@ import { API_PATHS } from "../../utils/apiPaths";
 import moment from "moment";
 import SummaryCard from "../../components/Cards/SummaryCard";
 import { CARD_BG } from "../../utils/data";
+import Modal from "../../components/Modal";
+import CreateSessionForm from "./CreateSessionForm";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openCreateModal, setOpenCreateModal] = useState(false);
+
 
  const fetchAllSession = async () => {
   try {
@@ -73,7 +77,7 @@ export default function Dashboard() {
         </div>
 
         <button
-          onClick={() => navigate("/create-session")}
+          onClick={() => setOpenCreateModal(true)}
           className="fixed bottom-6 right-6 flex items-center gap-3 px-6 py-3 rounded-full
           bg-orange-500 text-white shadow-lg hover:scale-105 transition"
         >
@@ -81,6 +85,16 @@ export default function Dashboard() {
           <span className="hidden md:inline">Add New</span>
         </button>
       </div>
+      <Modal
+      isOpen={openCreateModal} onClose={()=>{
+        setOpenCreateModal(false);
+      }}
+      hideHeader
+      >
+        <div>
+          <CreateSessionForm/>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }
