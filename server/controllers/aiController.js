@@ -23,12 +23,14 @@ const extractJsonArray = (text) => {
 export const generateInterviewQuestions = async (req, res) => {
     console.log("REQ.USER ", req.user);
   try {
-    const {
-      role,
-      experience,
-      topicsToFocus,
-      numberOfQuestions
+   const {
+    role,
+    experience,
+    topicsToFocus,
+    numberOfQuestions,
+     description
     } = req.body;
+
 
     /* ---- VALIDATION ---- */
     if (
@@ -48,7 +50,8 @@ export const generateInterviewQuestions = async (req, res) => {
       user: req.user._id,
       role,
       experience,
-      topics: topicsToFocus
+      topicsToFocus,
+      description
     });
 
     /* ---- AI PROMPT ---- */
@@ -96,6 +99,8 @@ Do NOT add explanations or extra text.
         answer: q.answer
       }))
     );
+    session.questions = savedQuestions.map(q => q._id);
+    await session.save();
 
     /* ---- FINAL RESPONSE ---- */
     res.status(201).json({

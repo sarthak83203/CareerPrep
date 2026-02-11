@@ -47,13 +47,10 @@ export default function SummaryCard({
             </h2>
 
             {/* Topics pill */}
-            <p
-              className="inline-block mt-1 text-[11px] font-semibold 
-                         text-indigo-700 bg-indigo-100/70 
-                         px-2.5 py-1 rounded-full"
-            >
-              {topicsToFocus}
-            </p>
+            <p className="inline-block mt-1 text-[11px] font-semibold">
+                {topicsToFocus?.join(", ")}
+              </p>
+
           </div>
         </div>
 
