@@ -3,34 +3,38 @@ import Session from "../models/Session.js";
 import Question from "../models/Question.js";
 
 const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY
+  apiKey: process.env.GROQ_API_KEY,
 });
 
-/* ---------------- HELPER: Extract JSON ARRAY ---------------- */
+/* ---------------- SAFE JSON EXTRACTOR ---------------- */
 const extractJsonArray = (text) => {
-  const firstBracket = text.indexOf("[");
-  const lastBracket = text.lastIndexOf("]");
-
-  if (firstBracket === -1 || lastBracket === -1) {
-    throw new Error("No JSON array found in AI response");
+  // 1 Try ```json``` block first (BEST)
+  const jsonBlock = text.match(/```json([\s\S]*?)```/);
+  if (jsonBlock) {
+    return jsonBlock[1].trim();
   }
 
-  return text.slice(firstBracket, lastBracket + 1);
+  // 2️Fallback: try first [ ... ] array
+  const first = text.indexOf("[");
+  const last = text.lastIndexOf("]");
+  if (first !== -1 && last !== -1) {
+    return text.slice(first, last + 1);
+  }
+
+  console.error(" RAW AI TEXT (NO JSON FOUND):\n", text);
+  throw new Error("No JSON found in AI response");
 };
 
 /* ---------------- GENERATE QUESTIONS ---------------- */
-
 export const generateInterviewQuestions = async (req, res) => {
-    console.log("REQ.USER ", req.user);
   try {
-   const {
-    role,
-    experience,
-    topicsToFocus,
-    numberOfQuestions,
-     description
+    const {
+      role,
+      experience,
+      topicsToFocus,
+      numberOfQuestions,
+      description,
     } = req.body;
-
 
     /* ---- VALIDATION ---- */
     if (
@@ -45,72 +49,112 @@ export const generateInterviewQuestions = async (req, res) => {
         .json({ message: "Missing or invalid required fields" });
     }
 
-    /* ---- CREATE SESSION ---- */
+    console.log("REQ.USER:", req.user);
+
+    /* ---- CREATE SESSION (SAFE USER) ---- */
     const session = await Session.create({
-      user: req.user._id,
+      user: req.user?._id || null,   // PREVENT CRASH
       role,
       experience,
       topicsToFocus,
-      description
+      description,
     });
 
-    /* ---- AI PROMPT ---- */
+    /* ---- AI PROMPT (STRICT BUT FLEXIBLE) ---- */
     const prompt = `
 Generate ${numberOfQuestions} interview questions for a ${role}
 with ${experience} experience on topics: ${topicsToFocus.join(", ")}.
 
-Return ONLY a valid JSON array.
-Each element must have:
-- question
-- answer
+Try to return a valid JSON array wrapped in a \`\`\`json\`\`\` code block.
 
-Do NOT add explanations or extra text.
+Each object MUST have:
+- question (string)
+- answer (string, detailed and beginner friendly)
+
+If you cannot wrap in json block, still return a pure JSON array.
+
+DO NOT return anything except JSON.
 `;
 
-    /* ---- CALL AI ---- */
+    /* ---- CALL GROQ ---- */
     const response = await groq.chat.completions.create({
-      model:"llama-3.1-8b-instant",
+      model: "llama-3.1-8b-instant",
+      temperature: 0.2,
       messages: [
-        { role: "system", content: "You are a helpful interview assistant." },
-        { role: "user", content: prompt }
-      ]
+        { role: "system", content: "You are a JSON API. Output JSON only." },
+        { role: "user", content: prompt },
+      ],
     });
 
     const rawText = response.choices[0].message.content;
+
+    console.log("========== AI RAW RESPONSE ==========");
+    console.log(rawText);
 
     /* ---- PARSE AI RESPONSE SAFELY ---- */
     let questionsArray;
     try {
       const jsonString = extractJsonArray(rawText);
+      console.log("========== EXTRACTED JSON ==========");
+      console.log(jsonString);
+
       questionsArray = JSON.parse(jsonString);
     } catch (err) {
-      console.error("AI RAW RESPONSE:\n", rawText);
+      console.error("JSON PARSE ERROR:", err.message);
+      console.error(" RAW AI TEXT:\n", rawText);
+
       return res.status(500).json({
         message: "Failed to parse AI response",
-        rawText
+        rawText,
       });
     }
 
-    /* ---- SAVE QUESTIONS TO DB ---- */
+    console.log("========== PARSED QUESTIONS ==========");
+    console.log(questionsArray);
+
+    if (!Array.isArray(questionsArray)) {
+      return res.status(500).json({
+        message: "AI did not return an array",
+        rawText,
+      });
+    }
+
+    /* ---- CLEAN + VALIDATE ---- */
+    const cleaned = questionsArray.filter(
+      (q) => q && q.question && q.answer
+    );
+
+    if (cleaned.length === 0) {
+      return res.status(500).json({
+        message: "AI returned empty questions or answers",
+        rawText,
+      });
+    }
+
+    /* ---- SAVE TO DB ---- */
     const savedQuestions = await Question.insertMany(
-      questionsArray.map((q) => ({
+      cleaned.map((q) => ({
         session: session._id,
         question: q.question,
-        answer: q.answer
+        answer: q.answer,
       }))
     );
-    session.questions = savedQuestions.map(q => q._id);
+
+    session.questions = savedQuestions.map((q) => q._id);
     await session.save();
 
     /* ---- FINAL RESPONSE ---- */
     res.status(201).json({
       success: true,
       sessionId: session._id,
-      questions: savedQuestions
+      questions: savedQuestions,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error(" SERVER ERROR:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
@@ -124,25 +168,35 @@ export const generateConceptExplanation = async (req, res) => {
     }
 
     const response = await groq.chat.completions.create({
-      model:"llama-3.1-8b-instant",
+      model: "llama-3.1-8b-instant",
+      temperature: 0.3,
       messages: [
         {
           role: "system",
-          content: "Explain programming concepts clearly with examples."
+          content:
+            "Explain programming concepts clearly with examples and markdown.",
         },
         {
           role: "user",
-          content: question
-        }
-      ]
+          content: question,
+        },
+      ],
     });
+
+    const explanation = response.choices[0].message.content;
+
+    console.log("========== CONCEPT EXPLANATION ==========");
+    console.log(explanation);
 
     res.json({
       success: true,
-      explanation: response.choices[0].message.content
+      explanation,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error("SERVER ERROR:", error);
+    res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
