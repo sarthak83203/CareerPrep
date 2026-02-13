@@ -80,6 +80,7 @@ DO NOT return anything except JSON.
     const response = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       temperature: 0.2,
+       max_tokens: 4000, 
       messages: [
         { role: "system", content: "You are a JSON API. Output JSON only." },
         { role: "user", content: prompt },
