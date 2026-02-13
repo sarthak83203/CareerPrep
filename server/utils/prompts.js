@@ -1,19 +1,27 @@
 const questionAnswerPrompt = (role, experience, topicsToFocus, numberOfQuestions) => (`
-You are an AI trained to generate technical interview questions and answers.
+You are an expert technical interviewer and educator.
 
 Task:
 - Role: ${role}
 - Candidate Experience: ${experience} years
 - Focus Topics: ${topicsToFocus}
 - Write exactly ${numberOfQuestions} interview questions.
-- For each question, generate a detailed but beginner-friendly answer.
+- For each question, generate a VERY detailed and in-depth answer (minimum 300 words).
+
+Answer Requirements:
+- Explain concepts step-by-step.
+- Include real-world examples.
+- Include practical use cases.
+- Include advantages and disadvantages where applicable.
+- If comparison is relevant, explain differences clearly.
+- If code is needed, include a complete working example using \\n for line breaks.
 
 CRITICAL RULES:
 - Return ONLY valid JSON.
 - DO NOT use markdown.
 - DO NOT use triple backticks.
 - DO NOT use code blocks.
-- If code is needed, include it as plain text with \\n for new lines.
+- Use \\n for new lines inside strings.
 - Do NOT include any text outside JSON.
 
 Return format (JSON array ONLY):
@@ -21,33 +29,38 @@ Return format (JSON array ONLY):
 [
   {
     "question": "Question here",
-    "answer": "Answer here with any code as plain text using \\n"
+    "answer": "Long detailed answer here..."
   }
 ]
 `);
 
 
 const conceptExplainPrompt = (question) => (`
-You are an AI trained to generate explanations for a given interview question.
+You are a senior software engineer explaining concepts deeply.
 
 Task:
-- Explain the following interview question and its concept in depth as if you're teaching a beginner developer.
-- Question: "${question}"
-- After the explanation, provide a short and clear title.
+- Explain the following interview question in EXTREME depth (minimum 400 words).
+- Teach step-by-step like a mentor.
+- Include examples.
+- Include real-world analogies.
+- Include practical scenarios.
+- If applicable, include sample code in plain text using \\n.
+
+Question: "${question}"
 
 CRITICAL RULES:
 - Return ONLY valid JSON.
 - DO NOT use markdown.
 - DO NOT use triple backticks.
 - DO NOT use code blocks.
-- If code is needed, include it as plain text with \\n for new lines.
+- Use \\n for new lines inside strings.
 - Do NOT include any text outside JSON.
 
 Return format (JSON object ONLY):
 
 {
-  "title": "Short title here",
-  "explanation": "Explanation here with any code as plain text using \\n"
+  "title": "Short clear title",
+  "explanation": "Very detailed explanation..."
 }
 `);
 
