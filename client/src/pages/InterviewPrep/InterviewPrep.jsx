@@ -11,13 +11,45 @@ import RoleInfoHeader from "../../components/RoleInfoHeader";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import QuestionCard from "../../components/Cards/QuestionCard";
+import { LuCircleAlert } from "react-icons/lu";
+import AIResponsePreview from "./components/AIResponsePreview";
+import Drawer from "../../components/Drawer";
+import SkeletonLoader from "../../components/Loader/SkeletonLoader";
 
 export default function InterviewPrep() {
   const { sessionId } = useParams();
-
+  const[isLoading,setIsLoading]=useState(false);
   const [sessionData, setSessionData] = useState(null);
-  const [openLearnMoreDrawer, setOpenLearnDrawer] = useState(false);
+  const [openLearnMoreDrawer, setOpenLearnMoreDrawer] = useState(false);
   const [explanation, setExplanation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+
+  //Concept Explanation
+
+  const generateConceptExplanation = async (question) => {
+  try {
+    setErrorMsg("");
+    setExplanation(null);
+    setIsLoading(true);
+    setOpenLearnMoreDrawer(true);
+
+    const response = await axiosInstance.post(
+      API_PATHS.AI.GENERATE_EXPLANATION,
+      { question }
+    );
+
+    if (response.data) {
+      setExplanation(response.data);
+    }
+  } catch (error) {
+    setExplanation(null);
+    setErrorMsg("Failed to generate explanation. Try again later.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // Toggle Pin
   const toggleQuestionPinStatus = async (questionId) => {
@@ -129,9 +161,9 @@ export default function InterviewPrep() {
                         question={data?.question}
                         answer={data?.answer}
                         onLearnMore={() => {
-                          setExplanation(data.answer);
-                          setOpenLearnDrawer(true);
-                        }}
+                         generateConceptExplanation(data.question);
+                          }}
+
                         isPinned={data?.isPinned}
                         onTogglePin={() =>
                           toggleQuestionPinStatus(data._id)
@@ -145,39 +177,29 @@ export default function InterviewPrep() {
             </div>
 
             {/*  Animated Drawer */}
-            <AnimatePresence>
-              {openLearnMoreDrawer && (
-                <motion.div
-                  initial={{ x: 100, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 100, opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                  className="col-span-12 md:col-span-5"
-                >
-                  <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl p-8 sticky top-6">
-
-                    <h3 className="text-xl font-bold text-gray-800 mb-5">
-                      Concept Explanation
-                    </h3>
-
-                    <div className="text-sm text-gray-600 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
-                      {explanation}
-                    </div>
-
-                    <button
-                      onClick={() => setOpenLearnDrawer(false)}
-                      className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      Close
-                    </button>
-
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            
 
           </div>
         </div>
+      <Drawer
+         isOpen={openLearnMoreDrawer}
+        onClose={() => setOpenLearnMoreDrawer(false)}
+          title="Concept Explanation"
+        >
+        {errorMsg && (
+         <p className="flex gap-2 text-sm text-amber-600 font-medium">
+          <LuCircleAlert className="mt-1" />
+          {errorMsg}
+        </p>
+      )}
+
+  {isLoading && <SkeletonLoader />}
+
+  {!isLoading && explanation && (
+    <AIResponsePreview content={explanation?.explanation || explanation} />
+  )}
+</Drawer>
+
       </div>
     </DashboardLayout>
   );
