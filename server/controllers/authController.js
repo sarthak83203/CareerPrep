@@ -7,6 +7,7 @@ const generateToken = (id) => {
 };
 
 // REGISTER
+// REGISTER
 const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -15,10 +16,13 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ message: "User already exists" });
   }
 
+  // HASH PASSWORD
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   const user = await User.create({
     name,
     email,
-    password,
+    password: hashedPassword,
   });
 
   res.status(201).json({
@@ -26,6 +30,7 @@ const registerUser = async (req, res) => {
     token: generateToken(user._id),
   });
 };
+
 
 // LOGIN
 const loginUser = async (req, res) => {
