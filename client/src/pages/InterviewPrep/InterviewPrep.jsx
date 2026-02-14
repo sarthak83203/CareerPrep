@@ -11,18 +11,62 @@ import RoleInfoHeader from "../../components/RoleInfoHeader";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import QuestionCard from "../../components/Cards/QuestionCard";
-import { LuCircleAlert } from "react-icons/lu";
+import { LuCircleAlert, LuListCollapse } from "react-icons/lu";
 import AIResponsePreview from "./components/AIResponsePreview";
 import Drawer from "../../components/Drawer";
 import SkeletonLoader from "../../components/Loader/SkeletonLoader";
+import SpinnerLoader from "../../components/Loader/SpinnerLoader";
+
 
 export default function InterviewPrep() {
   const { sessionId } = useParams();
   const[isLoading,setIsLoading]=useState(false);
+  const [isUpdateLoader, setIsUpdateLoader] = useState(false);
+
   const [sessionData, setSessionData] = useState(null);
   const [openLearnMoreDrawer, setOpenLearnMoreDrawer] = useState(false);
   const [explanation, setExplanation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  
+  //more questions
+const uploadMoreQuestions = async () => {
+  try {
+    setIsUpdateLoader(true);
+    setErrorMsg("");
+
+   const aiResponse = await axiosInstance.post(
+  API_PATHS.AI.GENERATE_QUESTIONS,
+  {
+    sessionId,  
+    role: sessionData?.role,
+    experience: sessionData?.experience,
+    topicsToFocus: sessionData?.topicsToFocus,
+    numberOfQuestions: 10,
+  }
+);
+
+
+    const generatedQuestions =
+      aiResponse.data.questions || aiResponse.data;
+
+    if (!Array.isArray(generatedQuestions)) {
+      throw new Error("AI did not return an array");
+    }
+
+    
+   
+
+    await fetchSessionDetailsById();
+
+  } catch (error) {
+    console.error("UPLOAD ERROR:", error);
+    setErrorMsg("Failed to load more questions.");
+  } finally {
+    setIsUpdateLoader(false);
+  }
+};
+
+
 
 
   //Concept Explanation
@@ -171,6 +215,19 @@ export default function InterviewPrep() {
                       />
 
                     </div>
+                    {!isLoading &&
+                         sessionData?.questions?.length==index+1 && (
+                          <div className="flex items-center justify-center mt-5">
+                            <button className="flex items-center gap-3 text-sm text-white font-medium bg-black px-5 py-2 mr-2 rounded text-nowrap cursor-pointer" disabled={isLoading || isUpdateLoader} onClick={uploadMoreQuestions}>
+                              {isUpdateLoader ?(
+                                <SpinnerLoader/>
+                              ):(
+                                <LuListCollapse className="text-lg"/>
+                              )}{" "}
+                              Load More
+                            </button>
+                          </div>
+                         )}
                   </motion.div>
                 ))}
               </AnimatePresence>

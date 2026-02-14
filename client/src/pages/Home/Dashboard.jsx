@@ -9,12 +9,34 @@ import SummaryCard from "../../components/Cards/SummaryCard";
 import { CARD_BG } from "../../utils/data";
 import Modal from "../../components/Modal";
 import CreateSessionForm from "./CreateSessionForm";
+import DeleteAlertContent from "../../components/DeleteAlertContent";
+import { toast } from "react-hot-toast";
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openCreateModal, setOpenCreateModal] = useState(false);
+  const [openDeleteAlert, setOpenDeleteAlert] = useState({
+     open: false,
+      data: null,
+    });
+
+   const deleteSession = async (session) => {
+  if (!session?._id) return;
+
+  try {
+    await axiosInstance.delete(API_PATHS.SESSION.DELETE(session._id));
+    setSessions((prev) => prev.filter((s) => s._id !== session._id));
+    setOpenDeleteAlert({ open: false, data: null });
+    toast.success("Session deleted successfully!");
+  } catch (err) {
+    console.error("Error deleting the session:", err);
+    toast.error("Error deleting the session. Please try again later");
+  }
+};
+
 
 
  const fetchAllSession = async () => {
@@ -62,17 +84,19 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 md:px-0">
           {sessions.map((data, index) => (
-            <SummaryCard
-              key={data._id}
-              colors={CARD_BG[index % CARD_BG.length]}
-              role={data.role}
-              topicsToFocus={data.topicsToFocus}
-              experience={data.experience}
-              questions={data.questions?.length || 0}
-              description={data.description}
-              lastUpdated={moment(data.updatedAt).format("Do MMM YYYY")}
-              onSelect={() => navigate(`/interview-prep/${data._id}`)}
-            />
+           <SummaryCard
+          key={data._id}
+          colors={CARD_BG[index % CARD_BG.length]}
+          role={data.role}
+          topicsToFocus={data.topicsToFocus}
+          experience={data.experience}
+          questions={data.questions?.length || 0}
+          description={data.description}
+          lastUpdated={moment(data.updatedAt).format("Do MMM YYYY")}
+          onSelect={() => navigate(`/interview-prep/${data._id}`)}
+          onDelete={() => setOpenDeleteAlert({ open: true, data })}
+/>
+
           ))}
         </div>
 
@@ -93,6 +117,21 @@ export default function Dashboard() {
       >
         <div>
           <CreateSessionForm/>
+        </div>
+      </Modal>
+      <Modal
+      isOpen={openDeleteAlert?.open}
+      onClose={()=>{
+        setOpenDeleteAlert({open:false,date:null});
+
+      }}
+      title="Delete Alert"
+      >
+        <div className="w-[30vw]">
+          <DeleteAlertContent
+           content="Are you sure you want to delete the session details?"
+           onDelete={()=>deleteSession(openDeleteAlert.data)}
+           />
         </div>
       </Modal>
     </DashboardLayout>

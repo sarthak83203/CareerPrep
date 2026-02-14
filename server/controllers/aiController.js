@@ -27,6 +27,8 @@ const extractJsonArray = (text) => {
 
 /* ---------------- GENERATE QUESTIONS ---------------- */
 export const generateInterviewQuestions = async (req, res) => {
+  const { sessionId } = req.body;
+
   try {
     const {
       role,
@@ -52,13 +54,25 @@ export const generateInterviewQuestions = async (req, res) => {
     console.log("REQ.USER:", req.user);
 
     /* ---- CREATE SESSION (SAFE USER) ---- */
-    const session = await Session.create({
-      user: req.user?._id || null,   // PREVENT CRASH
-      role,
-      experience,
-      topicsToFocus,
-      description,
-    });
+    let session;
+
+if (sessionId) {
+  // Add questions to existing session
+  session = await Session.findById(sessionId);
+  if (!session) {
+    return res.status(404).json({ message: "Session not found" });
+  }
+} else {
+  // Create new session
+  session = await Session.create({
+    user: req.user?._id || null,
+    role,
+    experience,
+    topicsToFocus,
+    description,
+  });
+}
+
 
     /* ---- AI PROMPT (STRICT BUT FLEXIBLE) ---- */
     const prompt = `
@@ -141,8 +155,16 @@ DO NOT return anything except JSON.
       }))
     );
 
-    session.questions = savedQuestions.map((q) => q._id);
-    await session.save();
+  const newQuestionIds = savedQuestions.map((q) => q._id);
+
+// If session already has questions, append
+session.questions = [
+  ...(session.questions || []),
+  ...newQuestionIds,
+];
+
+await session.save();
+
 
     /* ---- FINAL RESPONSE ---- */
     res.status(201).json({
