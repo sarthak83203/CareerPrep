@@ -70,70 +70,117 @@ export default function Dashboard() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="container mx-auto pt-6 pb-24">
+  <DashboardLayout>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      
+      <div className="container mx-auto px-4 md:px-8 pt-10 pb-28">
 
+        {/* Page Heading */}
+        <div className="mb-10">
+          <h1 className="text-2xl md:text-3xl font-bold 
+            bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400
+            bg-clip-text text-transparent">
+            Your Interview Sessions 🚀
+          </h1>
+          <p className="text-slate-400 text-sm mt-2">
+            Manage, review, and continue your AI-powered interview prep.
+          </p>
+        </div>
+
+        {/* Empty State */}
         {sessions.length === 0 && (
-          <div className="text-center text-gray-500 mt-20">
-            <p className="text-lg">No sessions yet 🚀</p>
-            <p className="text-sm mt-2">
+          <div className="flex flex-col items-center justify-center 
+            text-center mt-24
+            border border-dashed border-slate-700
+            rounded-2xl p-12
+            bg-white/5 backdrop-blur-md
+          ">
+            <p className="text-lg text-slate-300 font-medium">
+              No sessions yet 🚀
+            </p>
+            <p className="text-sm text-slate-400 mt-2">
               Click “Add New” to create your first interview session
             </p>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 px-4 md:px-0">
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {sessions.map((data, index) => (
-           <SummaryCard
-          key={data._id}
-          colors={CARD_BG[index % CARD_BG.length]}
-          role={data.role}
-          topicsToFocus={data.topicsToFocus}
-          experience={data.experience}
-          questions={data.questions?.length || 0}
-          description={data.description}
-          lastUpdated={moment(data.updatedAt).format("Do MMM YYYY")}
-          onSelect={() => navigate(`/interview-prep/${data._id}`)}
-          onDelete={() => setOpenDeleteAlert({ open: true, data })}
-/>
-
+            <div
+              key={data._id}
+              className="transition-all duration-300 hover:scale-[1.02]"
+            >
+              <SummaryCard
+                colors={CARD_BG[index % CARD_BG.length]}
+                role={data.role}
+                topicsToFocus={data.topicsToFocus}
+                experience={data.experience}
+                questions={data.questions?.length || 0}
+                description={data.description}
+                lastUpdated={moment(data.updatedAt).format("Do MMM YYYY")}
+                onSelect={() =>
+                  navigate(`/interview-prep/${data._id}`)
+                }
+                onDelete={() =>
+                  setOpenDeleteAlert({ open: true, data })
+                }
+              />
+            </div>
           ))}
         </div>
 
+        {/* Floating Add Button */}
         <button
           onClick={() => setOpenCreateModal(true)}
-          className="fixed bottom-6 right-6 flex items-center gap-3 px-6 py-3 rounded-full
-          bg-orange-500 text-white shadow-lg hover:scale-105 transition"
+          className="
+            fixed bottom-8 right-8
+            flex items-center gap-3
+            px-6 py-3 rounded-full
+            bg-gradient-to-r from-indigo-500 to-purple-600
+            text-white font-medium
+            shadow-[0_10px_30px_rgba(99,102,241,0.5)]
+            transition-all duration-300
+            hover:scale-110
+            hover:shadow-[0_15px_40px_rgba(139,92,246,0.6)]
+            active:scale-95
+          "
         >
           <LuPlus className="text-xl" />
           <span className="hidden md:inline">Add New</span>
         </button>
-      </div>
-      <Modal
-      isOpen={openCreateModal} onClose={()=>{
-        setOpenCreateModal(false);
-      }}
-      hideHeader
-      >
-        <div>
-          <CreateSessionForm/>
-        </div>
-      </Modal>
-      <Modal
-      isOpen={openDeleteAlert?.open}
-      onClose={()=>{
-        setOpenDeleteAlert({open:false,date:null});
 
-      }}
-      title="Delete Alert"
+      </div>
+
+      {/* Create Modal */}
+      <Modal
+        isOpen={openCreateModal}
+        onClose={() => setOpenCreateModal(false)}
+        hideHeader
       >
-        <div className="w-[30vw]">
+        <CreateSessionForm />
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal
+        isOpen={openDeleteAlert?.open}
+        onClose={() =>
+          setOpenDeleteAlert({ open: false, data: null })
+        }
+        title="Delete Alert"
+      >
+        <div className="w-full md:w-[400px]">
           <DeleteAlertContent
-           content="Are you sure you want to delete the session details?"
-           onDelete={()=>deleteSession(openDeleteAlert.data)}
-           />
+            content="Are you sure you want to delete the session details?"
+            onDelete={() =>
+              deleteSession(openDeleteAlert.data)
+            }
+          />
         </div>
       </Modal>
-    </DashboardLayout>
-  );
+
+    </div>
+  </DashboardLayout>
+);
+
 }

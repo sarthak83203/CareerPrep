@@ -11,104 +11,116 @@ export default function SummaryCard({
 }) {
   return (
     <div
-      className="group bg-gradient-to-br from-white to-gray-50 
-                 border border-gray-200 rounded-2xl p-2 
-                 hover:shadow-2xl transition-all duration-300 
-                 hover:-translate-y-1 relative cursor-pointer"
       onClick={onSelect}
+      className="relative group cursor-pointer mb-6"
     >
-      {/* Header */}
+      {/* Animated Gradient Border */}
+      <div className="absolute -inset-[1px] rounded-3xl blur-xl opacity-40 
+                      bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 
+                      group-hover:opacity-70 transition duration-700" />
+
+      {/* Main Card */}
       <div
-        className="rounded-xl p-4 relative 
-                   bg-gradient-to-br from-indigo-50 via-white to-pink-50"
+        className="relative rounded-3xl p-6 
+                   bg-gradient-to-br from-[#0f172a] to-[#0b1120] 
+                   border border-white/10 
+                   backdrop-blur-2xl
+                   transition-all duration-500
+                   hover:-translate-y-3 hover:scale-[1.02]
+                   shadow-[0_0_40px_rgba(99,102,241,0.25)]
+                   hover:shadow-[0_0_60px_rgba(139,92,246,0.5)]"
       >
-        <div className="flex items-start">
-          {/* Icon */}
-          <div
-            className="flex-shrink-0 w-12 h-12 
-                       bg-white/80 backdrop-blur 
-                       rounded-xl flex items-center justify-center mr-4 
-                       shadow-md ring-1 ring-gray-200"
-          >
-            <span className="text-lg font-bold text-indigo-600">
-                {role
-            ?.split(" ")
-            .map(word => word[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()}
-            </span>
-          </div>
+        {/* Shimmer Hover Effect */}
+        <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+          <div className="absolute -left-1/2 top-0 h-full w-1/2 
+                          bg-gradient-to-r from-transparent via-white/10 to-transparent 
+                          skew-x-[-20deg] 
+                          opacity-0 group-hover:opacity-100
+                          group-hover:animate-[shine_1.2s_ease-in-out]" />
+        </div>
 
-          {/* Content */}
-          <div className="flex-grow">
-            <h2 className="text-[18px] font-bold text-gray-900 tracking-tight">
-              {role}
-            </h2>
+        {/* HEADER */}
+        <div className="flex items-start justify-between relative z-10">
+          <div className="flex items-start gap-4">
 
-            {/* Topics pill */}
-            <p className="inline-block mt-1 text-[11px] font-semibold">
-                {topicsToFocus?.join(", ")}
+            {/* Role Avatar */}
+            <div
+              className="flex-shrink-0 w-14 h-14 rounded-2xl 
+                         bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500
+                         flex items-center justify-center
+                         text-white font-bold text-lg
+                         shadow-lg transition duration-500
+                         group-hover:scale-110"
+            >
+              {role
+                ?.split(" ")
+                .map((word) => word[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </div>
+
+            {/* Role Info */}
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                {role}
+              </h2>
+
+              <p className="mt-1 text-xs font-semibold 
+                            text-indigo-300 
+                            bg-indigo-500/10 
+                            px-3 py-1 rounded-full inline-block">
+                {topicsToFocus?.join(" • ")}
               </p>
-
+            </div>
           </div>
+
+          {/* Delete Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="opacity-0 group-hover:opacity-100 
+                       transition-all duration-300
+                       text-xs font-semibold
+                       text-rose-400 
+                       bg-rose-500/10 
+                       px-3 py-1.5 rounded-xl
+                       border border-rose-500/20
+                       hover:bg-rose-500/20
+                       hover:scale-105"
+          >
+            🗑 Delete
+          </button>
         </div>
 
-        {/* Delete Button (hover) */}
-        <button
-          className="hidden group-hover:flex items-center gap-2 
-                     text-xs text-rose-600 font-semibold 
-                     bg-rose-50 px-3 py-1.5 rounded-lg 
-                     border border-rose-200 
-                     hover:bg-rose-100 hover:border-rose-300 
-                     transition-all duration-200 cursor-pointer 
-                     absolute top-3 right-3 shadow-sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          🗑 Delete
-        </button>
-      </div>
+        {/* TAGS */}
+        <div className="flex flex-wrap gap-3 mt-6 relative z-10">
+          <span className="text-xs font-semibold 
+                           text-blue-300 
+                           bg-blue-500/10 
+                           px-3 py-1.5 rounded-full border border-blue-500/20">
+             Exp: {experience}
+          </span>
 
-      {/* Footer */}
-      <div className="px-3 pb-3">
-        {/* Tags */}
-        <div className="flex flex-wrap items-center gap-2 mt-4">
-          <div
-            className="text-[10px] font-semibold 
-                       text-indigo-700 px-3 py-1 
-                       bg-indigo-50 border border-indigo-100 
-                       rounded-full"
-          >
-            Exp: {experience}
-          </div>
+          <span className="text-xs font-semibold 
+                           text-emerald-300 
+                           bg-emerald-500/10 
+                           px-3 py-1.5 rounded-full border border-emerald-500/20">
+             {questions} Q&A
+          </span>
 
-          <div
-            className="text-[10px] font-semibold 
-                       text-emerald-700 px-3 py-1 
-                       bg-emerald-50 border border-emerald-100 
-                       rounded-full"
-          >
-            {questions} Q&A
-          </div>
-
-          <div
-            className="text-[10px] font-semibold 
-                       text-amber-700 px-3 py-1 
-                       bg-amber-50 border border-amber-100 
-                       rounded-full"
-          >
-            Updated: {lastUpdated}
-          </div>
+          <span className="text-xs font-semibold 
+                           text-amber-300 
+                           bg-amber-500/10 
+                           px-3 py-1.5 rounded-full border border-amber-500/20">
+             {lastUpdated}
+          </span>
         </div>
 
-        {/* Description */}
-        <p
-          className="text-[12px] text-gray-600 font-medium 
-                     line-clamp-2 mt-3 leading-relaxed"
-        >
+        {/* DESCRIPTION */}
+        <p className="mt-5 text-sm text-gray-300 leading-relaxed line-clamp-2 relative z-10">
           {description}
         </p>
       </div>

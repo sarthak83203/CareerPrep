@@ -15,7 +15,7 @@ export default function Login({ setCurrentPage }) {
 
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+ const handleLogin = async (e) => {
   e.preventDefault();
 
   if (!validateEmail(email)) {
@@ -37,22 +37,20 @@ export default function Login({ setCurrentPage }) {
       { email, password }
     );
 
-    console.log("LOGIN RESPONSE:", response.data);
-const { token, user } = response.data;
-
-localStorage.setItem("token", token);
-updateUser(user);
-navigate("/dashboard");
-
-
+    const { token, user } = response.data;
 
     if (!token) {
       setError("Login failed. No token received.");
       return;
     }
 
+    // Store token
     localStorage.setItem("token", token);
-    updateUser(userData);
+
+    // Update global user context
+    updateUser(user);
+
+    // Navigate after success
     navigate("/dashboard");
 
   } catch (err) {
@@ -64,59 +62,94 @@ navigate("/dashboard");
   }
 };
 
-  return (
-    <div className="w-[90vw] md:w-[380px] p-8 bg-white rounded-2xl shadow-xl">
-      <h3 className="text-2xl font-bold text-gray-900">
-        Welcome Back 
-      </h3>
-      <p className="text-sm text-gray-500 mt-1 mb-6">
-        Login to continue to your dashboard
-      </p>
 
-      <form onSubmit={handleLogin} className="space-y-4">
-        <Input
-          label="Email Address"
-          type="email"
-          placeholder="john@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+ return (
+  <div className="fixed inset-0 overflow-hidden flex items-center justify-center bg-[#050816]">
 
-        <Input
-          label="Password"
-          type="password"
-          placeholder="Minimum 8 characters"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+    {/* Background Gradient */}
+    <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-indigo-900/10 to-black"></div>
 
-        {error && (
-          <p className="text-sm text-red-500 bg-red-50 p-2 rounded-md">
-            {error}
+    {/* Glow Orbs */}
+    <div className="absolute top-0 left-0 w-72 h-72 bg-purple-600/20 blur-3xl rounded-full"></div>
+    <div className="absolute bottom-0 right-0 w-72 h-72 bg-indigo-600/20 blur-3xl rounded-full"></div>
+
+    <div className="relative w-full max-w-md mx-4">
+
+      {/* Glass Card */}
+      <div className="bg-white/5 backdrop-blur-2xl border border-white/10
+                      rounded-2xl shadow-2xl
+                      p-8 text-white">
+
+        <h3 className="text-3xl font-bold
+                       bg-gradient-to-r from-purple-400 to-indigo-400
+                       bg-clip-text text-transparent">
+          Welcome Back
+        </h3>
+
+        <p className="text-sm text-gray-400 mt-2 mb-8">
+          Login to continue to your dashboard
+        </p>
+
+        <form onSubmit={handleLogin} className="space-y-5">
+
+          <Input
+            label="Email Address"
+            type="email"
+            placeholder="john@example.com"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (error) setError("");
+            }}
+          />
+
+          <Input
+            label="Password"
+            type="password"
+            placeholder="Minimum 8 characters"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) setError("");
+            }}
+          />
+
+          {error && (
+            <div className="text-sm text-red-400 bg-red-500/10 
+                            border border-red-500/20 
+                            p-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-xl font-semibold
+                       bg-gradient-to-r from-purple-600 to-indigo-600
+                       hover:opacity-90 transition
+                       disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+
+          <p className="text-sm text-gray-400 text-center mt-4">
+            Don&apos;t have an account?{" "}
+            <button
+              type="button"
+              onClick={() => setCurrentPage("signup")}
+              className="text-purple-400 hover:text-purple-300"
+            >
+              Sign up
+            </button>
           </p>
-        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-primary text-white py-2.5 rounded-lg font-medium
-                     hover:bg-primary/90 transition-all
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-
-      <p className="text-sm text-gray-600 text-center mt-5">
-        Don&apos;t have an account?{" "}
-        <button
-          type="button"
-          onClick={() => setCurrentPage("signup")}
-          className="text-primary font-medium hover:underline"
-        >
-          Sign up
-        </button>
-      </p>
+        </form>
+      </div>
     </div>
-  );
+  </div>
+);
+
+
+
 }
