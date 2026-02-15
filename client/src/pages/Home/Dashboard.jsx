@@ -80,7 +80,7 @@ export default function Dashboard() {
           <h1 className="text-2xl md:text-3xl font-bold 
             bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400
             bg-clip-text text-transparent">
-            Your Interview Sessions 🚀
+            Your Interview Sessions 
           </h1>
           <p className="text-slate-400 text-sm mt-2">
             Manage, review, and continue your AI-powered interview prep.
@@ -96,7 +96,7 @@ export default function Dashboard() {
             bg-white/5 backdrop-blur-md
           ">
             <p className="text-lg text-slate-300 font-medium">
-              No sessions yet 🚀
+              No sessions yet 
             </p>
             <p className="text-sm text-slate-400 mt-2">
               Click “Add New” to create your first interview session
