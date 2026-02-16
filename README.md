@@ -1,4 +1,4 @@
-# 🤖 AI Interview Prep – AI-Powered Mock Interview Platform (MERN)
+# 🤖 CareerPrep – AI-Powered Mock Interview Platform (MERN)
 
 AI Interview Prep is a full-stack web application built using the MERN stack that enables users to simulate real-world technical and HR interviews. Users can select specific job roles and attempt dynamically generated AI-based interview questions through a clean, responsive, and modern interface.
 
@@ -59,15 +59,7 @@ AI Question Generation API
 
 ---
 
-## 🌟 Future Enhancements
 
-- AI-based answer evaluation & scoring  
-- Performance analytics dashboard  
-- Timer-based interview simulation  
-- Deployment (Vercel + Render + MongoDB Atlas)  
-- Admin panel for monitoring sessions  
-
----
 
 ## 💡 Why This Project Stands Out
 
